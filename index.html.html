@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordine d'Acquisto</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .form-section { padding: 30px; }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+        input[type="text"], input[type="date"], input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; }
+        tbody tr:hover { background-color: #f8f9ff; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.85em;
+        }
+        .actions-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 8px;
+            color: white;
+            text-align: right;
+        }
+        .summary h3 { font-size: 1.5em; margin-bottom: 10px; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover { color: #000; }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        @media (max-width: 768px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.5em; }
+            .form-section { padding: 20px; }
+            table { font-size: 0.85em; }
+            th, td { padding: 8px; }
+            .btn { padding: 8px 15px; font-size: 0.9em; }
+        }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; }
+            .btn, .actions-row, .alert { display: none !important; }
+            .header { background: white; color: #333; border-bottom: 2px solid #667eea; }
+            input, select { border: none; pointer-events: none; }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.31/dist/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Ordine d'Acquisto</h1>
+            <p>Sistema di ordinazione per reparto Sala e Piani</p>
+        </div>
+        
+        <div class="form-section">
+            <div class="info-grid">
+                <div class="form-group">
+                    <label for="dataOrdine">📅 Data Ordine *</label>
+                    <input type="date" id="dataOrdine" required>
+                </div>
+                <div class="form-group">
+                    <label for="reparto">🏢 Reparto *</label>
+                    <select id="reparto" required onchange="filterSuppliersByDepartment()">
+                        <option value="">-- Seleziona Reparto --</option>
+                        <option value="SALA">SALA</option>
+                        <option value="PIANI">PIANI</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ordinante">👤 Ordinante *</label>
+                    <input type="text" id="ordinante" placeholder="Nome e Cognome" required>
+                </div>
+                <div class="form-group">
+                    <label for="dataConsegna">🚚 Data Consegna Prevista</label>
+                    <input type="date" id="dataConsegna">
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                ℹ️ Compila i campi sopra, poi aggiungi i prodotti necessari nella tabella sottostante
+            </div>
+            
+            <div class="table-container">
+                <table id="orderTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%">Fornitore</th>
+                            <th style="width: 25%">Prodotto</th>
+                            <th style="width: 10%">Quantità</th>
+                            <th style="width: 12%">Confezione</th>
+                            <th style="width: 10%">Prezzo €</th>
+                            <th style="width: 10%">Sconto %</th>
+                            <th style="width: 8%">Totale €</th>
+                            <th style="width: 5%">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody"></tbody>
+                </table>
+            </div>
+            
+            <div class="actions-row">
+                <button class="btn btn-primary" onclick="addRow()">➕ Aggiungi Prodotto</button>
+                <button class="btn btn-primary" onclick="openNewSupplierModal()">🏭 Nuovo Fornitore</button>
+                <button class="btn btn-primary" onclick="openNewProductModal()">📦 Nuovo Prodotto</button>
+                <button class="btn btn-danger" onclick="openDeleteSupplierModal()">🗑️ Elimina Fornitore</button>
+                <button class="btn btn-danger" onclick="openDeleteProductModal()">🗑️ Elimina Prodotto</button>
+            </div>
+            
+            <div class="summary">
+                <h3>Totale Ordine: €<span id="totalAmount">0.00</span></h3>
+            </div>
+            
+            <div class="actions-row">
+                <button class="btn btn-success" onclick="saveOrder()">💾 Salva Ordine</button>
+                <button class="btn btn-primary" onclick="printOrder()">🖨️ Stampa</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="supplierModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeSupplierModal()">&times;</span>
+                <h2>Aggiungi Nuovo Fornitore</h2>
+            </div>
+            <div class="form-group">
+                <label for="newSupplierName">Nome Fornitore *</label>
+                <input type="text" id="newSupplierName" placeholder="Es: FORNITORE SRL">
+            </div>
+            <button class="btn btn-success" onclick="addNewSupplier()">Aggiungi Fornitore</button>
+        </div>
+    </div>
+    
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeProductModal()">&times;</span>
+                <h2>Aggiungi Nuovo Prodotto</h2>
+            </div>
+            <div class="form-group">
+                <label for="productSupplier">Fornitore *</label>
+                <select id="productSupplier"></select>
+            </div>
+            <div class="form-group">
+                <label for="newProductName">Nome Prodotto *</label>
+                <input type="text" id="newProductName" placeholder="Es: CAFFÈ ARABICA 1KG">
+            </div>
+            <div class="form-group">
+                <label for="newProductPrice">Prezzo Unitario €</label>
+                <input type="number" id="newProductPrice" step="0.01" placeholder="0.00">
+            </div>
+            <button class="btn btn-success" onclick="addNewProduct()">Aggiungi Prodotto</button>
+        </div>
+    </div>
+
+    <div id="deleteSupplierModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeDeleteSupplierModal()">&times;</span>
+                <h2>Elimina Fornitore</h2>
+            </div>
+            <div class="form-group">
+                <label for="deleteSupplierSelect">Seleziona Fornitore da Eliminare *</label>
+                <select id="deleteSupplierSelect"></select>
+            </div>
+            <button class="btn btn-danger" onclick="deleteSupplier()">Elimina Fornitore</button>
+        </div>
+    </div>
+
+    <div id="deleteProductModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeDeleteProductModal()">&times;</span>
+                <h2>Elimina Prodotto</h2>
+            </div>
+            <div class="form-group">
+                <label for="deleteProductSupplier">Fornitore *</label>
+                <select id="deleteProductSupplier" onchange="loadProductsForDelete()"></select>
+            </div>
+            <div class="form-group">
+                <label for="deleteProductSelect">Prodotto da Eliminare *</label>
+                <select id="deleteProductSelect"></select>
+            </div>
+            <button class="btn btn-danger" onclick="deleteProduct()">Elimina Prodotto</button>
+        </div>
+    </div>
+
+    <script>
+        const suppliersData = {
+            "ARCA COMMERCIALE S.R.L.": [
+                {name: "ACQUA NATURALE VERA", price: 0.26, unit: "PZ"},
+                {name: "OLIVE VE.MEDIE SELEX", price: 1.49, unit: "PZ"},
+                {name: "TORTILLA", price: 1.59, unit: "PZ"},
+                {name: "LEMONSODA ZERO", price: 0.96, unit: "PZ"},
+                {name: "ACQUA TONICA SCHWEPPES", price: 0.88, unit: "PZ"},
+                {name: "S.CARLO PATATINE CLASSICHE", price: 1.82, unit: "PZ"},
+                {name: "POSATE COMPOSTABILI", price: 1.49, unit: "PZ"},
+                {name: "CUCCHIAINI COMPOSTABILI", price: 1.95, unit: "PZ"},
+                {name: "FORCHETTE COMPOSTABILI", price: 1.49, unit: "PZ"},
+                {name: "PIATTI DESSERT BIO", price: 1.29, unit: "PZ"},
+                {name: "SALE FABRIANO INTEGRALE", price: 17.50, unit: "KG"},
+                {name: "DADO STAR PORCINI", price: 0.99, unit: "PZ"},
+                {name: "TOVAGLIOLI", price: 0.99, unit: "PZ"},
+                {name: "ARACHIDI TOSTATE/SALATE", price: 3.90, unit: "PZ"},
+                {name: "CAMPARI SODA FAMIGLIA", price: 7.30, unit: "PZ"},
+                {name: "BIRRA ICHNUSA NON FILTRATA", price: 1.05, unit: "PZ"},
+                {name: "PARMIGIANO REGGIANO 24M", price: 5.69, unit: "PZ"},
+                {name: "SALE PIÙ IODIO GROSSO", price: 0.37, unit: "PZ"},
+                {name: "KIT KAT FAMILY", price: 2.49, unit: "PZ"},
+                {name: "KINDER BARRETTA TIPO", price: 2.85, unit: "PZ"},
+                {name: "BIRRA RAFFO 1/3", price: 2.19, unit: "PZ"},
+                {name: "COCA COLA REGULAR PET", price: 1.59, unit: "PZ"},
+                {name: "GIN BEEFEATER", price: 13.99, unit: "PZ"},
+                {name: "SPUMANTE BRUT ROCCA DEI FORTI", price: 2.29, unit: "PZ"},
+                {name: "FALERNO PECORINO DOC", price: 5.79, unit: "PZ"},
+                {name: "PASSERINA MARCHE IGT", price: 4.48, unit: "PZ"},
+                {name: "ROSSO PICENO DOP", price: 5.19, unit: "PZ"},
+                {name: "ROSSO CONERO DOC", price: 3.55, unit: "PZ"}
+            ],
+            "CAFFESPRESSO": [
+                {name: "CAPSULA REKICO RIVIERA MARRONE", price: 0.32, unit: "PZ"},
+                {name: "CAPSULA REKICO DEK", price: 0.34, unit: "PZ"}
+            ],
+            "DAC Spa": [
+                {name: "MUESLI FRUTTA VENOSTA", price: 7.43, unit: "PZ"},
+                {name: "SEMI DI GIRASOLE SGUSCIATI", price: 3.59, unit: "PZ"},
+                {name: "SEMI DI LINO", price: 3.01, unit: "PZ"},
+                {name: "CARAMELLE MINI FRUTTA ZAINI", price: 6.06, unit: "PZ"},
+                {name: "TÈ PURE GREEN TEA TWININGS", price: 2.59, unit: "PZ"},
+                {name: "UOVA MEDIE 53/63 GRAMMI CAT.A", price: 0.19, unit: "PZ"},
+                {name: "YOGURT NATURALE INTERO", price: 7.75, unit: "PZ"},
+                {name: "EDAMER ARCO", price: 5.70, unit: "KG"},
+                {name: "PROSCIUTTO COTTO GRANBLU", price: 6.66, unit: "KG"},
+                {name: "PANE MINI FRUSTINO", price: 11.31, unit: "CT"}
+            ],
+            "ERREBIAN S.P.A.": [
+                {name: "TOVAGLIOLO 40X40 CAFFÈ", price: 90.00, unit: "CF"},
+                {name: "TOVAGLIOLO AMERICANA", price: 216.00, unit: "CF"},
+                {name: "RUNNER FIESTA", price: 52.00, unit: "N"}
+            ],
+            "FORNO D'ASOLO S.p.A.": [
+                {name: "TRESORÉ FORMINI BURRO", price: 60.00, unit: "SC"},
+                {name: "TRESORÉ BURRO CON CEREALI", price: 53.00, unit: "SC"}
+            ],
+            "GABELLINI GROUP SRL": [
+                {name: "CAFFÈ TOSTATO DECISO", price: 19.50, unit: "KG"},
+                {name: "TERSO MILK CAPPUCCINATORE", price: 15.00, unit: "LT"}
+            ],
+            "LA BOTTEGA S.P.A.": [
+                {name: "DISPENSER SHOWER GEL SWEET MANDARIN", price: 3.24, unit: "PZ"},
+                {name: "DISPENSER SHAMPOO SWEET MANDARIN", price: 3.24, unit: "PZ"}
+            ],
+            "M.D. INTERNATIONAL SRL": [
+                {name: "OXI DEL 2.0", price: 60.08, unit: "Nr"},
+                {name: "MAC VIA PRONTO USO", price: 116.80, unit: "Nr"},
+                {name: "B-TENS", price: 87.90, unit: "Nr"}
+            ],
+            "ORTOSERVICE (DAC Spa)": [
+                {name: "MELE GOLDEN A.A.", price: 2.46, unit: "KG"},
+                {name: "ARANCE NAVEL", price: 2.30, unit: "KG"},
+                {name: "KIWI ITALIA", price: 4.50, unit: "KG"},
+                {name: "MELONI VERDI", price: 3.40, unit: "KG"}
+            ],
+            "VALCE S.R.L.": [
+                {name: "LAVASTOVIGLIE EQO", price: 25.75, unit: "NR"},
+                {name: "BOBINA CARTA FLU' 2 VELI", price: 11.30, unit: "NR"},
+                {name: "PANNO ANTISTATICO", price: 2.47, unit: "NR"},
+                {name: "BRILLANTANTE EQO", price: 50.49, unit: "NR"},
+                {name: "TOVAGLIOLO 33x33 BIANCO 2V", price: 0.67, unit: "NR"},
+                {name: "SAPONE LAVAMANI BIHSOAP", price: 9.64, unit: "NR"}
+            ]
+        };
+        
+        let suppliers = Object.keys(suppliersData);
+        let productsDatabase = JSON.parse(JSON.stringify(suppliersData));
+        const pianiSuppliers = ["LA BOTTEGA S.P.A.", "VALCE S.R.L.", "M.D. INTERNATIONAL SRL"];
+        
+        document.getElementById('dataOrdine').valueAsDate = new Date();
+        
+        function filterSuppliersByDepartment() {
+            const reparto = document.getElementById('reparto').value;
+            const allSelects = document.querySelectorAll('.supplier-select');
+            
+            allSelects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">-- Seleziona Fornitore --</option>';
+                
+                let suppliersToShow = suppliers;
+                if (reparto === 'PIANI') {
+                    suppliersToShow = suppliers.filter(s => pianiSuppliers.includes(s));
+                }
+                
+                suppliersToShow.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s;
+                    option.textContent = s;
+                    select.appendChild(option);
+                });
+                
+                if (suppliersToShow.includes(currentValue)) {
+                    select.value = currentValue;
+                } else {
+                    const row = select.closest('tr');
+                    if (row) {
+                        const productSelect = row.querySelector('.product-select');
+                        productSelect.innerHTML = '<option value="">-- Prima seleziona fornitore --</option>';
+                        productSelect.disabled = true;
+                        row.querySelector('.price').value = 0;
+                        row.querySelector('.package').value = '';
+                        calculateRowTotal(row.querySelector('.quantity'));
+                    }
+                }
+            });
+        }
+        
+        window.onload = function() { addRow(); };
+        
+        function addRow() {
+            const tbody = document.getElementById('orderTableBody');
+            const row = tbody.insertRow();
+            const reparto = document.getElementById('reparto').value;
+            let suppliersToShow = suppliers;
+            if (reparto === 'PIANI') {
+                suppliersToShow = suppliers.filter(s => pianiSuppliers.includes(s));
+            }
+            
+            row.innerHTML = `
+                <td>
+                    <select class="supplier-select" onchange="updateProducts(this)">
+                        <option value="">-- Seleziona Fornitore --</option>
+                        ${suppliersToShow.map(s => `<option value="${s}">${s}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <select class="product-select" disabled onchange="updatePrice(this)">
+                        <option value="">-- Prima seleziona fornitore --</option>
+                    </select>
+                </td>
+                <td><input type="number" class="quantity" min="0" value="1" onchange="calculateRowTotal(this)"></td>
+                <td><input type="text" class="package" placeholder="Es: CF, KG, PZ"></td>
+                <td><input type="number" class="price" step="0.01" min="0" value="0" onchange="calculateRowTotal(this)"></td>
+                <td><input type="number" class="discount" step="0.01" min="0" max="100" value="0" onchange="calculateRowTotal(this)"></td>
+                <td class="row-total">0.00</td>
+                <td><button class="btn btn-danger" onclick="deleteRow(this)">🗑️</button></td>
+            `;
+        }
+        
+        function updateProducts(selectElement) {
+            const row = selectElement.closest('tr');
+            const productSelect = row.querySelector('.product-select');
+            const supplier = selectElement.value;
+            
+            productSelect.innerHTML = '<option value="">-- Seleziona Prodotto --</option>';
+            
+            if (supplier && productsDatabase[supplier]) {
+                productsDatabase[supplier].forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = JSON.stringify(product);
+                    option.textContent = product.name;
+                    productSelect.appendChild(option);
+                });
+                productSelect.disabled = false;
+            } else {
+                productSelect.disabled = true;
+            }
+            row.querySelector('.price').value = 0;
+            row.querySelector('.package').value = '';
+            calculateRowTotal(row.querySelector('.quantity'));
+        }
+        
+        function updatePrice(selectElement) {
+            const row = selectElement.closest('tr');
+            if (selectElement.value) {
+                const product = JSON.parse(selectElement.value);
+                row.querySelector('.price').value = product.price.toFixed(2);
+                row.querySelector('.package').value = product.unit;
+                calculateRowTotal(row.querySelector('.quantity'));
+            }
+        }
+        
+        function calculateRowTotal(element) {
+            const row = element.closest('tr');
+            const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+            const price = parseFloat(row.querySelector('.price').value) || 0;
+            const discount = parseFloat(row.querySelector('.discount').value) || 0;
+            
+            const subtotal = quantity * price;
+            const discountAmount = subtotal * (discount / 100);
+            const total = subtotal - discountAmount;
+            
+            row.querySelector('.row-total').textContent = total.toFixed(2);
+            calculateGrandTotal();
+        }
+        
+        function calculateGrandTotal() {
+            const rows = document.querySelectorAll('#orderTableBody tr');
+            let grandTotal = 0;
+            rows.forEach(row => {
+                const rowTotal = parseFloat(row.querySelector('.row-total').textContent) || 0;
+                grandTotal += rowTotal;
+            });
+            document.getElementById('totalAmount').textContent = grandTotal.toFixed(2);
+        }
+        
+        function deleteRow(button) {
+            if (confirm('Sei sicuro di voler eliminare questa riga?')) {
+                button.closest('tr').remove();
+                calculateGrandTotal();
+            }
+        }
+        
+        function openNewSupplierModal() {
+            document.getElementById('supplierModal').style.display = 'block';
+        }
+        
+        function closeSupplierModal() {
+            document.getElementById('supplierModal').style.display = 'none';
+            document.getElementById('newSupplierName').value = '';
+        }
+        
+        function addNewSupplier() {
+            const supplierName = document.getElementById('newSupplierName').value.trim();
+            if (!supplierName) { alert('Inserisci il nome del fornitore'); return; }
+            if (suppliers.includes(supplierName)) { alert('Questo fornitore esiste già'); return; }
+            
+            suppliers.push(supplierName);
+            productsDatabase[supplierName] = [];
+            alert(`Fornitore "${supplierName}" aggiunto con successo!`);
+            closeSupplierModal();
+            
+            document.querySelectorAll('.supplier-select').forEach(select => {
+                const option = document.createElement('option');
+                option.value = supplierName;
+                option.textContent = supplierName;
+                select.appendChild(option);
+            });
+        }
+        
+        function openNewProductModal() {
+            const select = document.getElementById('productSupplier');
+            select.innerHTML = '<option value="">-- Seleziona Fornitore --</option>';
+            suppliers.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s;
+                option.textContent = s;
+                select.appendChild(option);
+            });
+            document.getElementById('productModal').style.display = 'block';
+        }
+        
+        function closeProductModal() {
+            document.getElementById('productModal').style.display = 'none';
+            document.getElementById('newProductName').value = '';
+            document.getElementById('newProductPrice').value = '';
+        }
+        
+        function addNewProduct() {
+            const supplier = document.getElementById('productSupplier').value;
+            const productName = document.getElementById('newProductName').value.trim();
+            const productPrice = parseFloat(document.getElementById('newProductPrice').value) || 0;
+            
+            if (!supplier) { alert('Seleziona un fornitore'); return; }
+            if (!productName) { alert('Inserisci il nome del prodotto'); return; }
+            
+            productsDatabase[supplier].push({name: productName, price: productPrice, unit: "PZ"});
+            alert(`Prodotto "${productName}" aggiunto al fornitore "${supplier}"!`);
+            closeProductModal();
+        }
+        
+        function openDeleteSupplierModal() {
+            const select = document.getElementById('deleteSupplierSelect');
+            select.innerHTML = '<option value="">-- Seleziona Fornitore --</option>';
+            suppliers.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s;
+                option.textContent = s;
+                select.appendChild(option);
+            });
+            document.getElementById('deleteSupplierModal').style.display = 'block';
+        }
+        
+        function closeDeleteSupplierModal() {
+            document.getElementById('deleteSupplierModal').style.display = 'none';
+        }
+        
+        function deleteSupplier() {
+            const supplierToDelete = document.getElementById('deleteSupplierSelect').value;
+            if (!supplierToDelete) {
+                alert('Seleziona un fornitore da eliminare');
+                return;
+            }
+            
+            if (confirm(`Sei sicuro di voler eliminare il fornitore "${supplierToDelete}" e tutti i suoi prodotti?`)) {
+                // Rimuovi dall'array suppliers
+                suppliers = suppliers.filter(s => s !== supplierToDelete);
+                // Rimuovi dal database prodotti
+                delete productsDatabase[supplierToDelete];
+                
+                // Aggiorna tutti i select nelle righe esistenti
+                document.querySelectorAll('.supplier-select').forEach(select => {
+                    const currentValue = select.value;
+                    const options = Array.from(select.options);
+                    options.forEach(opt => {
+                        if (opt.value === supplierToDelete) {
+                            opt.remove();
+                        }
+                    });
+                    
+                    // Se il fornitore eliminato era selezionato, resetta la riga
+                    if (currentValue === supplierToDelete) {
+                        select.value = '';
+                        const row = select.closest('tr');
+                        const productSelect = row.querySelector('.product-select');
+                        productSelect.innerHTML = '<option value="">-- Prima seleziona fornitore --</option>';
+                        productSelect.disabled = true;
+                        row.querySelector('.price').value = 0;
+                        row.querySelector('.package').value = '';
+                        calculateRowTotal(row.querySelector('.quantity'));
+                    }
+                });
+                
+                alert(`Fornitore "${supplierToDelete}" eliminato con successo!`);
+                closeDeleteSupplierModal();
+            }
+        }
+        
+        function openDeleteProductModal() {
+            const select = document.getElementById('deleteProductSupplier');
+            select.innerHTML = '<option value="">-- Seleziona Fornitore --</option>';
+            suppliers.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s;
+                option.textContent = s;
+                select.appendChild(option);
+            });
+            document.getElementById('deleteProductSelect').innerHTML = '<option value="">-- Prima seleziona fornitore --</option>';
+            document.getElementById('deleteProductModal').style.display = 'block';
+        }
+        
+        function closeDeleteProductModal() {
+            document.getElementById('deleteProductModal').style.display = 'none';
+        }
+        
+        function loadProductsForDelete() {
+            const supplier = document.getElementById('deleteProductSupplier').value;
+            const select = document.getElementById('deleteProductSelect');
+            select.innerHTML = '<option value="">-- Seleziona Prodotto --</option>';
+            
+            if (supplier && productsDatabase[supplier]) {
+                productsDatabase[supplier].forEach((product, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = product.name;
+                    select.appendChild(option);
+                });
+            }
+        }
+        
+        function deleteProduct() {
+            const supplier = document.getElementById('deleteProductSupplier').value;
+            const productIndex = document.getElementById('deleteProductSelect').value;
+            
+            if (!supplier) {
+                alert('Seleziona un fornitore');
+                return;
+            }
+            
+            if (productIndex === '') {
+                alert('Seleziona un prodotto da eliminare');
+                return;
+            }
+            
+            const productName = productsDatabase[supplier][productIndex].name;
+            
+            if (confirm(`Sei sicuro di voler eliminare il prodotto "${productName}"?`)) {
+                productsDatabase[supplier].splice(productIndex, 1);
+                alert(`Prodotto "${productName}" eliminato con successo!`);
+                loadProductsForDelete(); // Ricarica la lista
+            }
+        }
+        
+        function saveOrder() {
+            const dataOrdine = document.getElementById('dataOrdine').value;
+            const reparto = document.getElementById('reparto').value;
+            const ordinante = document.getElementById('ordinante').value.trim();
+            const dataConsegna = document.getElementById('dataConsegna').value;
+            
+            if (!dataOrdine || !reparto || !ordinante) {
+                alert('⚠️ Compila tutti i campi obbligatori!');
+                return;
+            }
+            
+            const rows = document.querySelectorAll('#orderTableBody tr');
+            if (rows.length === 0) {
+                alert('⚠️ Aggiungi almeno un prodotto all\'ordine!');
+                return;
+            }
+            
+            // Raccogli i dati dei prodotti
+            const prodotti = [];
+            rows.forEach(row => {
+                const supplier = row.querySelector('.supplier-select').value;
+                const productSelect = row.querySelector('.product-select');
+                const productName = productSelect.options[productSelect.selectedIndex].text;
+                
+                if (supplier && productName !== '-- Seleziona Prodotto --') {
+                    prodotti.push({
+                        fornitore: supplier,
+                        prodotto: productName,
+                        quantita: row.querySelector('.quantity').value,
+                        confezione: row.querySelector('.package').value,
+                        prezzo: parseFloat(row.querySelector('.price').value).toFixed(2),
+                        sconto: row.querySelector('.discount').value,
+                        totale: row.querySelector('.row-total').textContent
+                    });
+                }
+            });
+            
+            const totaleOrdine = document.getElementById('totalAmount').textContent;
+            
+            // Verifica che jsPDF sia caricato
+            if (typeof window.jspdf === 'undefined') {
+                alert('⚠️ Librerie PDF in caricamento...\n\nAttendi 3 secondi e riprova.\n\nSe il problema persiste, ricarica la pagina.');
+                return;
+            }
+            
+            try {
+                // Genera PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Header con titolo
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('ORDINE D\'ACQUISTO', 105, 20, { align: 'center' });
+                
+                // Sottotitolo
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+                doc.text('Hotel Universal', 105, 28, { align: 'center' });
+                
+                // Linea separatrice
+                doc.setLineWidth(0.5);
+                doc.line(20, 32, 190, 32);
+                
+                // Informazioni ordine
+                doc.setFontSize(11);
+                let y = 40;
+                
+                doc.setFont(undefined, 'bold');
+                doc.text('Data Ordine:', 20, y);
+                doc.setFont(undefined, 'normal');
+                doc.text(new Date(dataOrdine).toLocaleDateString('it-IT'), 60, y);
+                
+                y += 7;
+                doc.setFont(undefined, 'bold');
+                doc.text('Reparto:', 20, y);
+                doc.setFont(undefined, 'normal');
+                doc.text(reparto, 60, y);
+                
+                y += 7;
+                doc.setFont(undefined, 'bold');
+                doc.text('Ordinante:', 20, y);
+                doc.setFont(undefined, 'normal');
+                doc.text(ordinante, 60, y);
+                
+                y += 7;
+                doc.setFont(undefined, 'bold');
+                doc.text('Data Consegna:', 20, y);
+                doc.setFont(undefined, 'normal');
+                doc.text(dataConsegna ? new Date(dataConsegna).toLocaleDateString('it-IT') : 'Non specificata', 60, y);
+                
+                // Linea separatrice
+                y += 5;
+                doc.setLineWidth(0.3);
+                doc.line(20, y, 190, y);
+                
+                // Tabella prodotti
+                y += 5;
+                const tableData = prodotti.map(p => [
+                    p.fornitore,
+                    p.prodotto,
+                    p.quantita,
+                    p.confezione,
+                    '€ ' + p.prezzo,
+                    p.sconto + '%',
+                    '€ ' + p.totale
+                ]);
+                
+                doc.autoTable({
+                    startY: y,
+                    head: [['Fornitore', 'Prodotto', 'Qta', 'Conf.', 'Prezzo', 'Sconto', 'Totale']],
+                    body: tableData,
+                    theme: 'striped',
+                    headStyles: {
+                        fillColor: [102, 126, 234],
+                        fontSize: 10,
+                        fontStyle: 'bold',
+                        halign: 'center'
+                    },
+                    bodyStyles: {
+                        fontSize: 9
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 40 },
+                        1: { cellWidth: 55 },
+                        2: { cellWidth: 15, halign: 'center' },
+                        3: { cellWidth: 20, halign: 'center' },
+                        4: { cellWidth: 20, halign: 'right' },
+                        5: { cellWidth: 15, halign: 'center' },
+                        6: { cellWidth: 20, halign: 'right' }
+                    },
+                    margin: { left: 20, right: 20 }
+                });
+                
+                // Totale complessivo
+                const finalY = doc.lastAutoTable.finalY + 10;
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.text('TOTALE:', 140, finalY);
+                doc.text('€ ' + totaleOrdine, 190, finalY, { align: 'right' });
+                
+                // Footer
+                const pageHeight = doc.internal.pageSize.height;
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'italic');
+                doc.setTextColor(128);
+                doc.text('Documento generato automaticamente - Hotel Universal', 105, pageHeight - 10, { align: 'center' });
+                doc.setTextColor(0);
+                
+                // Salva il PDF
+                const fileName = `Ordine_${reparto}_${dataOrdine}_${ordinante.replace(/\s+/g, '_')}.pdf`;
+                doc.save(fileName);
+                
+                // Salva in localStorage
+                const orderData = {
+                    dataOrdine, reparto, ordinante, dataConsegna,
+                    prodotti: prodotti,
+                    totale: totaleOrdine
+                };
+                
+                const storageKey = `ordini${reparto}`;
+                const ordini = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                ordini.push({...orderData, id: Date.now(), timestamp: new Date().toISOString()});
+                localStorage.setItem(storageKey, JSON.stringify(ordini));
+                
+                alert('✅ Ordine salvato con successo!\n\nIl PDF è stato scaricato.');
+                
+            } catch (error) {
+                console.error('Errore generazione PDF:', error);
+                alert('❌ Errore nella generazione del PDF.\n\nERRORE: ' + error.message + '\n\nRicarica la pagina e riprova.');
+            }
+        }
+        
+        function printOrder() { window.print(); }
+        
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('supplierModal')) closeSupplierModal();
+            if (event.target == document.getElementById('productModal')) closeProductModal();
+            if (event.target == document.getElementById('deleteSupplierModal')) closeDeleteSupplierModal();
+            if (event.target == document.getElementById('deleteProductModal')) closeDeleteProductModal();
+        }
+    </script>
+</body>
+</html>
